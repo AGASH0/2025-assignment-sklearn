@@ -53,7 +53,7 @@ import pandas as pd
 
 from sklearn.base import BaseEstimator
 from sklearn.base import ClassifierMixin
-from sklearn.base import BaseCrossValidator
+from sklearn.model_selection import BaseCrossValidator
 from sklearn.utils.validation import check_X_y
 from sklearn.utils.validation import check_array
 from sklearn.utils.validation import check_is_fitted
