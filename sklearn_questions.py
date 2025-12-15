@@ -63,17 +63,17 @@ from sklearn.utils.validation import check_X_y,check_array
 from sklearn.utils.multiclass import check_classification_targets
 
 class KNearestNeighbors(ClassifierMixin, BaseEstimator):
+    """KNearestNeighbors classifier.
+
+    This classifier is compatible with scikit-learn and passes check_estimator.
     """
-    KNearestNeighbors classifier compatible avec scikit-learn.
-    ATTENTION : L'ordre d'héritage (ClassifierMixin, BaseEstimator) est crucial.
-    """
+
     def __init__(self, n_neighbors=1):
+        """Initialize the estimator."""
         self.n_neighbors = n_neighbors
 
     def fit(self, X, y):
-        """
-        Adapte le modèle aux données d'entraînement.
-        """
+        """Fit the model using X as training data and y as target values."""
         # Validation des entrées
         X, y = check_X_y(X, y)
         check_classification_targets(y)
@@ -89,16 +89,17 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         return self
 
     def predict(self, X):
-        """
-        Prédit les étiquettes de classe.
-        """
+        """Predict the class labels for the provided data."""
         check_is_fitted(self)
         X = check_array(X)
 
         # Vérification explicite des dimensions pour check_estimator
         if X.shape[1] != self.n_features_in_:
-            raise ValueError(f"X has {X.shape[1]} features, but KNearestNeighbors "
-                             f"is expecting {self.n_features_in_} features as input.")
+            msg = (
+                f"X has {X.shape[1]} features, but KNearestNeighbors "
+                f"is expecting {self.n_features_in_} features as input."
+            )
+            raise ValueError(msg)
 
         # Calcul des distances
         distances = pairwise_distances(X, self.X_train_)
@@ -123,26 +124,29 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         return values[np.argmax(counts)]
 
     def score(self, X, y):
-        """Score accuracy standard."""
+        """Return the mean accuracy on the given test data and labels."""
         return np.mean(self.predict(X) == y)
 
 
 class MonthlySplit(BaseCrossValidator):
+    """Monthly split cross-validator.
+
+    Splits data based on monthly intervals (Rolling Window).
+    Train: Month M, Test: Month M+1.
     """
-    Splitter temporel mensuel strict (Rolling Window).
-    Train : Mois M, Test : Mois M+1.
-    """
+
     def __init__(self, time_col='index'):
+        """Initialize the splitter."""
         self.time_col = time_col
 
     def get_n_splits(self, X=None, y=None, groups=None):
-        """Retourne le nombre de splits possibles."""
+        """Return the number of splitting iterations in the cross-validator."""
         dates = self._get_dates(X)
         months = dates.dt.to_period('M').unique()
         return max(0, len(months) - 1)
 
     def split(self, X, y=None, groups=None):
-        """Génère les indices train/test."""
+        """Generate indices to split data into training and test set."""
         dates = self._get_dates(X)
         n_samples = len(dates)
         indices = np.arange(n_samples)
@@ -165,7 +169,7 @@ class MonthlySplit(BaseCrossValidator):
             yield train_idx, test_idx
 
     def _get_dates(self, X):
-        """Extrait la colonne de dates."""
+        """Extract the date column from X."""
         if self.time_col == 'index':
             try:
                 dates = X.index
@@ -178,6 +182,6 @@ class MonthlySplit(BaseCrossValidator):
                 raise ValueError(f"Colonne '{self.time_col}' introuvable.")
 
         if not pd.api.types.is_datetime64_any_dtype(dates):
-             raise ValueError("La colonne doit être de type datetime.")
+            raise ValueError("La colonne doit être de type datetime.")
 
         return pd.Series(dates)
