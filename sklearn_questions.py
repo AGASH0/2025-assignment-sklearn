@@ -53,13 +53,13 @@ import pandas as pd
 
 from sklearn.base import BaseEstimator
 from sklearn.base import ClassifierMixin
-
-from sklearn.model_selection import BaseCrossValidator
-
+from sklearn.base import BaseCrossValidator
+from sklearn.utils.validation import check_X_y
+from sklearn.utils.validation import check_array
 from sklearn.utils.validation import check_is_fitted
-from sklearn.metrics.pairwise import pairwise_distances
-from sklearn.utils.validation import check_X_y,check_array
 from sklearn.utils.multiclass import check_classification_targets
+from sklearn.metrics import pairwise_distances
+
 
 class KNearestNeighbors(ClassifierMixin, BaseEstimator):
     """KNearestNeighbors classifier.
